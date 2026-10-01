@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABC Links</title>
+  <style>
+    :root {
+      --bg: #050505;
+      --card-bg: #0d0d11;
+      --card-border: #1a1a24;
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.35);
+      --text: #f3f4f6;
+      --text-muted: #71717a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Ambient background blur */
+    .glow-bg {
+      position: fixed;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 300px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .logo {
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 30%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    /* Controls Bar */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (min-width: 640px) {
+      .controls {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .search-box {
+      position: relative;
+      flex-grow: 1;
+      max-width: 400px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      align-items: center;
+    }
+
+    .tab {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .tab:hover, .tab.active {
+      color: var(--text);
+      border-color: var(--accent);
+      background-color: rgba(99, 102, 241, 0.1);
+    }
+
+    .btn-add {
+      background-color: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: opacity 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-add:hover {
+      opacity: 0.9;
+    }
+
+    /* Grid Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    /* Slick Card Design */
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px var(--accent-glow);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .category-tag {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      background-color: #181824;
+      color: var(--accent);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      line-height: 1.4;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-launch {
+      flex-grow: 1;
+      text-align: center;
+      background-color: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      padding: 0.6rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: opacity 0.2s ease;
+    }
+
+    .btn-launch:hover {
+      opacity: 0.9;
+    }
+
+    .btn-icon {
+      background: #181824;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-icon:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .btn-icon.fav.active {
+      color: #f59e0b;
+      border-color: #f59e0b;
+    }
+
+    /* Modal Overlay & Form */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 90%;
+      max-width: 450px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+    }
+
+    .modal h2 {
+      margin-bottom: 1.25rem;
+      font-size: 1.5rem;
+      color: var(--text);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #12121a;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--accent);
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-submit {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--card-bg);
+      border: 1px solid var(--accent);
+      color: var(--text);
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      font-size: 0.875rem;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glow-bg"></div>
+
+  <div class="container">
+    <header>
+      <div class="logo">ABC LINKS</div>
+      <p>Custom command dashboard</p>
+    </header>
+
+    <div class="controls">
+      <div class="search-box">
+        <input type="text" id="searchInput" oninput="filterCards()" placeholder="Search links or categories...">
+      </div>
+      <div class="filter-tabs">
+        <button class="tab active" onclick="setCategory('all', this)">All</button>
+        <button class="tab" onclick="setCategory('favorites', this)">★ Saved</button>
+        <button class="tab" onclick="setCategory('media', this)">Media</button>
+        <button class="tab" onclick="setCategory('math', this)">Math</button>
+        <button class="tab" onclick="setCategory('games', this)">Games</button>
+        <button class="btn-add" onclick="openModal()">+ Add Link</button>
+      </div>
+    </div>
+
+    <div class="grid" id="linksGrid">
+      
+      <!-- Card 1 -->
+      <div class="card" data-category="media" data-id="1">
+        <div>
+          <div class="card-header">
+            <h3>Movies</h3>
+            <span class="category-tag">Media</span>
+          </div>
+          <p>KissKH streaming directory.</p>
+        </div>
+        <div class="card-actions">
+          <a href="https://kisskh.co/" target="_blank" rel="noopener noreferrer" class="btn-launch">Open</a>
+          <button class="btn-icon" onclick="copyLink('https://kisskh.co/')" title="Copy URL">📋</button>
+          <button class="btn-icon fav" onclick="toggleFavorite(1, this)" title="Save link">★</button>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="card" data-category="math" data-id="2">
+        <div>
+          <div class="card-header">
+            <h3>Jordans Math Work</h3>
+            <span class="category-tag">Math</span>
+          </div>
+          <p>Study Science hosted page.</p>
+        </div>
+        <div class="card-actions">
+          <a href="https://studyscience.pages.dev/" target="_blank" rel="noopener noreferrer" class="btn-launch">Open</a>
+          <button class="btn-icon" onclick="copyLink('https://studyscience.pages.dev/')" title="Copy URL">📋</button>
+          <button class="btn-icon fav" onclick="toggleFavorite(2, this)" title="Save link">★</button>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="card" data-category="math" data-id="3">
+        <div>
+          <div class="card-header">
+            <h3>Jordans Math Cloaked</h3>
+            <span class="category-tag">Math</span>
+          </div>
+          <p>Redirect portal.</p>
+        </div>
+        <div class="card-actions">
+          <a href="https://www.google.com/goto?url=CAESZgHrOzAVo-HK02zdtlJiOPbnXNpGNN5cgepbM3s3vSzTFzAsrWPXb_McT8Bc9uYedod5vYbV_ntdapYWm7yJnQT_hEYnSyGhvek4eB572QkSdU62h8231JcDM6Y06EL9gF_S763NYw" target="_blank" rel="noopener noreferrer" class="btn-launch">Open</a>
+          <button class="btn-icon" onclick="copyLink('https://www.google.com/goto?...')" title="Copy URL">📋</button>
+          <button class="btn-icon fav" onclick="toggleFavorite(3, this)" title="Save link">★</button>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="card" data-category="games" data-id="4">
+        <div>
+          <div class="card-header">
+            <h3>Games</h3>
+            <span class="category-tag">Games</span>
+          </div>
+          <p>Arcade Hub Gaming platform.</p>
+        </div>
+        <div class="card-actions">
+          <a href="https://arcadehubgaming.github.io/v4/" target="_blank" rel="noopener noreferrer" class="btn-launch">Open</a>
+          <button class="btn-icon" onclick="copyLink('https://arcadehubgaming.github.io/v4/')" title="Copy URL">📋</button>
+          <button class="btn-icon fav" onclick="toggleFavorite(4, this)" title="Save link">★</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Add Link Modal -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal">
+      <h2>Add New Link</h2>
+      <form id="linkForm" onsubmit="handleAddLink(event)">
+        <div class="form-group">
+          <label for="linkTitle">Title</label>
+          <input type="text" id="linkTitle" placeholder="e.g. My Favorite Site" required>
+        </div>
+        <div class="form-group">
+          <label for="linkUrl">URL</label>
+          <input type="url" id="linkUrl" placeholder="https://example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="linkCategory">Category</label>
+          <select id="linkCategory">
+            <option value="media">Media</option>
+            <option value="math">Math</option>
+            <option value="games">Games</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="linkDesc">Description</label>
+          <input type="text" id="linkDesc" placeholder="Short description...">
+        </div>
+        <div class="modal-buttons">
+          <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn-submit">Add Link</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Link copied to clipboard!</div>
+
+  <script>
+    let currentCategory = 'all';
+    let favorites = JSON.parse(localStorage.getItem('abc_favorites')) || [];
+    let customLinks = JSON.parse(localStorage.getItem('abc_custom_links')) || [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load stored custom links
+      customLinks.forEach(link => renderCard(link));
+
+      // Load star status
+      favorites.forEach(id => {
+        const card = document.querySelector(`.card[data-id="${id}"]`);
+        if (card) {
+          const favBtn = card.querySelector('.fav');
+          if (favBtn) favBtn.classList.add('active');
+        }
+      });
+    });
+
+    function setCategory(category, element) {
+      currentCategory = category;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      element.classList.add('active');
+      filterCards();
+    }
+
+    function filterCards() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const cards = document.querySelectorAll('.card');
+
+      cards.forEach(card => {
+        const title = card.querySelector('h3').textContent.toLowerCase();
+        const desc = card.querySelector('p').textContent.toLowerCase();
+        const category = card.dataset.category;
+        const id = card.dataset.id;
+
+        const matchesSearch = title.includes(query) || desc.includes(query);
+        let matchesCategory = false;
+
+        if (currentCategory === 'all') {
+          matchesCategory = true;
+        } else if (currentCategory === 'favorites') {
+          matchesCategory = favorites.includes(id) || favorites.includes(parseInt(id));
+        } else {
+          matchesCategory = category === currentCategory;
+        }
+
+        if (matchesSearch && matchesCategory) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function toggleFavorite(id, btn) {
+      const strId = String(id);
+      if (favorites.includes(strId) || favorites.includes(Number(id))) {
+        favorites = favorites.filter(favId => String(favId) !== strId);
+        btn.classList.remove('active');
+      } else {
+        favorites.push(strId);
+        btn.classList.add('active');
+      }
+      localStorage.setItem('abc_favorites', JSON.stringify(favorites));
+      if (currentCategory === 'favorites') filterCards();
+    }
+
+    function copyLink(url) {
+      navigator.clipboard.writeText(url).then(() => {
+        showToast('Link copied to clipboard!');
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    /* Modal Operations */
+    function openModal() {
+      document.getElementById('addModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('addModal').classList.remove('active');
+      document.getElementById('linkForm').reset();
+    }
+
+    function handleAddLink(e) {
+      e.preventDefault();
+      const title = document.getElementById('linkTitle').value;
+      const url = document.getElementById('linkUrl').value;
+      const category = document.getElementById('linkCategory').value;
+      const desc = document.getElementById('linkDesc').value || 'Custom saved link.';
+
+      const newLink = {
+        id: 'custom_' + Date.now(),
+        title,
+        url,
+        category,
+        desc
+      };
+
+      customLinks.push(newLink);
+      localStorage.setItem('abc_custom_links', JSON.stringify(customLinks));
+
+      renderCard(newLink);
+      filterCards();
+      closeModal();
+      showToast('New link added successfully!');
+    }
+
+    function renderCard(link) {
+      const grid = document.getElementById('linksGrid');
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.category = link.category;
+      card.dataset.id = link.id;
+
+      card.innerHTML = `
+        <div>
+          <div class="card-header">
+            <h3>${link.title}</h3>
+            <span class="category-tag">${link.category}</span>
+          </div>
+          <p>${link.desc}</p>
+        </div>
+        <div class="card-actions">
+          <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="btn-launch">Open</a>
+          <button class="btn-icon" onclick="copyLink('${link.url}')" title="Copy URL">📋</button>
+          <button class="btn-icon fav" onclick="toggleFavorite('${link.id}', this)" title="Save link">★</button>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    }
+  </script>
+</body>
+</html>
